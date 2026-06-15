@@ -1,0 +1,6 @@
+schema: spec-driven
+created: 2026-06-07
+goal: "Create boocontext: a local-first MCP codebase context server forked from
+  codesight that provides overview + deep analysis (call graph, impact, health
+  grades, type recovery) via child MCP servers, usable from opencode, claude,
+  and boocode/boochat"

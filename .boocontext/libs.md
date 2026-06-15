@@ -1,0 +1,174 @@
+# Libraries
+
+- `src/ast/extract-android.ts`
+  - function extractRetrofitRoutes: (filePath, content, tags) => RouteInfo[]
+  - function extractRoomEntities: (_filePath, content) => SchemaModel[]
+  - function extractComposeComponents: (filePath, content) => ComponentInfo[]
+  - function extractNavigationRoutes: (filePath, content) => RouteInfo[]
+  - function extractActivitiesFromManifest: (filePath, content) => RouteInfo[]
+- `src/ast/extract-brighterscript.ts` — function extractBrighterScriptImports: (content) => string[], function extractBrighterScriptExports: (content) => ExportItem[]
+- `src/ast/extract-brightscript.ts`
+  - function extractBrightScriptFunctions: (content) => ExportItem[]
+  - function extractBrightScriptObservers: (content) => BrightScriptObserver[]
+  - function extractBrightScriptNavigationCalls: (content, helperNames) => ShowScreenCall[]
+  - function extractBrightScriptShowScreenCalls: (content) => ShowScreenCall[]
+  - function extractBrightScriptGraphqlCalls: (content) => GraphqlCallSite[]
+  - function extractBrightScriptGlobalFields: (content) => GlobalFieldRegistration[]
+  - _...7 more_
+- `src/ast/extract-components.ts`
+  - function extractReactComponentsAST: (ts, filePath, content, relPath) => ComponentInfo[]
+  - function ComponentName: (...) => void
+  - function ComponentName
+- `src/ast/extract-csharp.ts`
+  - function extractAspNetControllerRoutes: (filePath, content, tags) => RouteInfo[]
+  - function extractAspNetMinimalApiRoutes: (filePath, content, tags) => RouteInfo[]
+  - function extractEntityFrameworkModels: (_filePath, content) => SchemaModel[]
+  - function extractCSharpExports: (content) => ExportItem[]
+- `src/ast/extract-dart.ts`
+  - function extractFlutterRoutes: (filePath, content, tags) => RouteInfo[]
+  - function extractFlutterWidgets: (filePath, content) => ComponentInfo[]
+  - function extractDartExports: (content) => ExportItem[]
+- `src/ast/extract-go.ts`
+  - function extractGoRoutesStructured: (filePath, content, framework, tags) => RouteInfo[]
+  - function extractGORMModelsStructured: (_filePath, content) => SchemaModel[]
+  - function extractEntSchemasStructured: (_filePath, content) => SchemaModel[]
+- `src/ast/extract-php.ts`
+  - function extractLaravelRoutes: (filePath, content, tags) => RouteInfo[]
+  - function extractEloquentModels: (_filePath, content) => SchemaModel[]
+  - function extractPhpExports: (content) => ExportItem[]
+- `src/ast/extract-python.ts`
+  - function extractPythonRoutesAST: (filePath, content, framework, tags) => Promise<RouteInfo[] | null>
+  - function extractSQLAlchemyAST: (filePath, content) => Promise<SchemaModel[] | null>
+  - function extractDjangoModelsAST: (filePath, content) => Promise<SchemaModel[] | null>
+  - function extractSQLModelAST: (filePath, content) => Promise<SchemaModel[] | null>
+  - function isPythonAvailable: () => Promise<boolean>
+- `src/ast/extract-routes.ts` — function extractRoutesAST: (ts, filePath, content, framework, tags) => RouteInfo[]
+- `src/ast/extract-scenegraph.ts`
+  - function extractSceneGraphComponent: (content) => SceneGraphComponent | null
+  - function extractMainSceneScreens: (content) => Record<string, string>
+  - function isSceneGraphXml: (content) => boolean
+  - interface SceneGraphComponent
+- `src/ast/extract-schema.ts` — function extractDrizzleSchemaAST: (ts, filePath, content) => SchemaModel[], function extractTypeORMSchemaAST: (ts, filePath, content) => SchemaModel[]
+- `src/ast/extract-swift.ts`
+  - function extractVaporRoutes: (filePath, content, tags) => RouteInfo[]
+  - function extractSwiftUIViews: (filePath, content) => ComponentInfo[]
+  - function extractSwiftExports: (content) => ExportItem[]
+- `src/ast/loader.ts`
+  - function loadTypeScript: (projectRoot) => any | null
+  - function resetCache: () => void
+  - function parseSourceFile: (ts, fileName, content) => any
+  - function getDecorators: (ts, node) => any[]
+  - function parseDecorator: (ts, sf, decorator) => void
+  - function getText: (sf, node) => string
+- `src/child-server.ts`
+  - class ChildServerManager
+  - interface ChildServerConfig
+  - const CHILD_SERVER_CONFIGS: ChildServerConfig[]
+- `src/config.ts` — function loadConfig: (root) => Promise<BoocontextConfig>, function mergeCliConfig: (config, cli) => BoocontextConfig
+- `src/core.ts`
+  - function scan: (root, outputDirName, maxDepth, userConfig, quiet) => Promise<ScanResult>
+  - const VERSION: string
+  - const BRAND
+- `src/dcp.ts`
+  - function compress: (input, threshold) => DcpEnvelope
+  - function decompress: (envelope) => string
+  - interface DcpEnvelope
+- `src/detectors/blast-radius.ts` — function analyzeBlastRadius: (filePath, result, maxDepth) => BlastRadiusResult, function analyzeMultiFileBlastRadius: (files, result, maxDepth) => BlastRadiusResult
+- `src/detectors/components.ts` — function detectComponents: (files, project) => Promise<ComponentInfo[]>, function ComponentName: (starts with uppercase) => void
+- `src/detectors/config.ts` — function detectConfig: (files, project) => Promise<ConfigInfo>
+- `src/detectors/contracts.ts` — function enrichRouteContracts: (routes, project) => Promise<RouteInfo[]>
+- `src/detectors/coverage.ts` — function isTestFile: (file) => boolean, function detectTestCoverage: (files, routes, schemas, projectRoot) => Promise<TestCoverage>
+- `src/detectors/events.ts` — function detectEvents: (files, project) => Promise<EventInfo[]>
+- `src/detectors/graph.ts` — function detectDependencyGraph: (files, project) => Promise<DependencyGraph>
+- `src/detectors/graphql.ts`
+  - function detectGraphQLRoutes: (files, project) => Promise<RouteInfo[]>
+  - function detectGRPCRoutes: (files, project) => Promise<RouteInfo[]>
+  - function detectWebSocketRoutes: (files, project) => Promise<RouteInfo[]>
+- `src/detectors/knowledge.ts` — function detectKnowledge: (files, root) => Promise<KnowledgeMap>
+- `src/detectors/libs.ts`
+  - function detectLibs: (files, project) => Promise<LibExport[]>
+  - function name: (params) => returnType
+  - function name
+  - class Name
+  - interface Name
+  - type Name
+  - _...2 more_
+- `src/detectors/middleware.ts` — function detectMiddleware: (files, project) => Promise<MiddlewareInfo[]>
+- `src/detectors/openapi.ts` — function detectOpenAPISpec: (root, project) => Promise<OpenAPIResult>, interface OpenAPIResult
+- `src/detectors/routes.ts` — function detectRoutes: (files, project, config?) => Promise<RouteInfo[]>, const GET
+- `src/detectors/schema.ts` — function detectSchemas: (files, project) => Promise<SchemaModel[]>, const users
+- `src/detectors/tokens.ts` — function estimateTokens: (text) => number, function calculateTokenStats: (result, outputText, fileCount) => import("../types.js").TokenStats
+- `src/eval.ts` — function runEval: () => Promise<void>
+- `src/formatter.ts`
+  - function writeOutput: (result, outputDir) => Promise<string>
+  - function computeCrudGroups: (routes) => import("./types.js").CrudGroup[]
+  - function formatKnowledge: (map, projectName, version) => string
+  - function writeKnowledgeOutput: (map, outputDir, projectName, version) => Promise<string>
+- `src/generators/ai-config.ts`
+  - function generateAIConfigs: (result, root) => Promise<string[]>
+  - function generateProfileConfig: (result, root, profile) => Promise<string>
+  - function generateMonorepoAIConfigs: (root, packages, outputDirName) => Promise<string[]>
+- `src/generators/html-report.ts` — function generateHtmlReport: (result, outputDir) => Promise<string>
+- `src/generators/wiki.ts`
+  - function generateWiki: (result, outputDir) => Promise<WikiResult>
+  - function readWikiArticle: (outputDir, article) => Promise<string | null>
+  - function listWikiArticles: (outputDir) => Promise<string[]>
+  - function lintWiki: (result, outputDir) => Promise<string>
+  - interface WikiResult
+- `src/mcp-server.ts` — function startMCPServer: () => void, const childManager
+- `src/monorepo/deps.ts` — function extractCrossPackageDeps: (packageDir, workspacePackageNames) => Promise<string[]>, function writeDepsFile: (packageDir, deps, outputDirName) => Promise<void>
+- `src/monorepo/discover.ts` — function discoverPackages: (root, config) => Promise<PackageInfo[]>, interface PackageInfo
+- `src/monorepo/orchestrator.ts` — function runMonorepoScan: (root, userConfig, targetPackage?) => Promise<PackageInfo[]>
+- `src/monorepo/watch.ts` — function watchMonorepo: (root, userConfig) => Promise<void>
+- `src/plugins/cicd/circleci.ts` — function extractCircleCIWorkflows: (parsed, relPath, rawContent) => CICDPipeline[]
+- `src/plugins/cicd/formatter.ts` — function formatCICD: (pipelines) => string
+- `src/plugins/cicd/github-actions.ts` — function extractGitHubActionsWorkflow: (parsed, relPath, rawContent) => CICDPipeline | null
+- `src/plugins/cicd/index.ts` — function createCICDPlugin: (config) => BoocontextPlugin, interface CICDPluginConfig
+- `src/plugins/cicd/yaml-parser.ts` — function parseYAML: (text) => any, function parseFlowSequence: (s) => any[]
+- `src/plugins/githooks/formatter.ts` — function formatGitHooks: (hooks) => string
+- `src/plugins/githooks/husky.ts` — function parseHusky: (root) => Promise<GitHook[]>
+- `src/plugins/githooks/index.ts` — function createGitHooksPlugin: () => BoocontextPlugin
+- `src/plugins/githooks/lefthook.ts` — function parseLefthook: (root) => Promise<GitHook[]>
+- `src/plugins/githooks/raw.ts` — function parseRawHooks: (root) => Promise<GitHook[]>
+- `src/plugins/skills/formatter.ts` — function formatSkills: (skills) => string
+- `src/plugins/skills/index.ts` — function createSkillsPlugin: () => BoocontextPlugin, interface Skill
+- `src/plugins/terraform/extractor.ts` — function extractServiceInfrastructure: (matchedBlocks, allBlocks, config) => ServiceInfrastructure, function extractEnvironments: (tfvarsFiles, serviceName) => Promise<Record<string, EnvironmentOverrides>>
+- `src/plugins/terraform/file-collector.ts`
+  - function collectTfFiles: (projectRoot, config) => Promise<CollectedFiles>
+  - function readFileSafe: (path) => Promise<string>
+  - interface CollectedFiles
+- `src/plugins/terraform/formatter.ts` — function formatInfrastructure: (infra) => string
+- `src/plugins/terraform/hcl-parser.ts`
+  - function parseHclFile: (content, filePath) => HclBlock[]
+  - function parseTfvars: (content) => Record<string, string>
+  - function stripComments: (content) => string
+  - function extractBraceBlock: (content, startAfterOpenBrace) => string | null
+- `src/plugins/terraform/index.ts` — function createTerraformPlugin: (config) => BoocontextPlugin
+- `src/plugins/terraform/service-matcher.ts`
+  - function matchServiceBlocks: (projectName, blocks, config) => HclBlock[]
+  - function normaliseServiceName: (name) => string
+  - interface ScoredBlock
+- `src/scan-cache.ts` — function getScanResult: (directory?) => Promise<ScanResult>, function clearCache: () => void
+- `src/scanner.ts`
+  - function readBoocontextIgnore: (root) => Promise<string[]>
+  - function loadFileHashCache: (outputDir) => Promise<FileHashCache>
+  - function saveFileHashCache: (outputDir, cache) => Promise<void>
+  - function hashFileContent: (content) => string
+  - function collectFiles: (root, maxDepth, ignorePatterns) => Promise<string[]>
+  - function readFileSafe: (path) => Promise<string>
+  - _...5 more_
+- `src/telemetry.ts`
+  - function runTelemetry: (root, result, outputDir) => Promise<TelemetryReport>
+  - interface TelemetryTask
+  - interface TelemetryReport
+- `src/tools/callgraph.ts` — function createCallgraphTool: (manager) => void
+- `src/tools/health.ts` — function createHealthTool: (manager) => void
+- `src/tools/impact.ts` — function createImpactTool: (manager) => void
+- `src/tools/map.ts` — function createMapTool: () => void
+- `src/tools/overview.ts` — function createOverviewTool: () => void
+- `src/tools/symbols.ts` — function createSymbolsTool: (manager) => void
+- `src/tools/types.ts` — function createTypesTool: (manager) => void
+- `src/verdict.ts`
+  - function makeVerdict: (verdict, summary, details, metadata) => VerdictEnvelope
+  - interface VerdictEnvelope
+  - type VerdictGrade
