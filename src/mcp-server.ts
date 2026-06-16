@@ -14,6 +14,7 @@ import { createSymbolsTool } from "./tools/symbols.js";
 import { createCallgraphTool } from "./tools/callgraph.js";
 import { createImpactTool } from "./tools/impact.js";
 import { createTypesTool } from "./tools/types.js";
+import { createSeverityTool } from "./tools/severity.js";
 
 /**
  * Boocontext MCP server — forked from boocontext upstream with 7 unified boocontext_* tools.
@@ -573,6 +574,7 @@ const boocontextTools = [
   createCallgraphTool(childManager),
   createImpactTool(childManager),
   createTypesTool(childManager),
+  createSeverityTool(childManager),
 ];
 
 for (const tool of boocontextTools) {

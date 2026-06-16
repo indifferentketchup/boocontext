@@ -1,4 +1,5 @@
 import { makeVerdict } from "../verdict.js";
+import { classifySeverity } from "./severity.js";
 export function createHealthTool(manager) {
     return {
         name: "boocontext_health",
@@ -19,6 +20,20 @@ export function createHealthTool(manager) {
                 }
                 if (args.file) {
                     const result = await tsaClient.callTool({ name: "health", arguments: { action: "file", file_path: args.file, scope: "file" } });
+                    const ftext = extractText(result);
+                    try {
+                        const parsed = JSON.parse(ftext);
+                        if (parsed.grade && parsed.dimensions) {
+                            parsed.severity = classifySeverity(parsed.grade, parsed.dimensions).severity;
+                            parsed.domain = classifySeverity(parsed.grade, parsed.dimensions).domain;
+                            return makeVerdict("INFO", `Health for ${args.file}`, parsed, {
+                                tool: "boocontext_health",
+                                source: "tree-sitter-analyzer",
+                                duration_ms: Date.now() - start,
+                            });
+                        }
+                    }
+                    catch { /* plain text — pass through unchanged */ }
                     return makeVerdict("INFO", `Health for ${args.file}`, result, {
                         tool: "boocontext_health",
                         source: "tree-sitter-analyzer",
@@ -29,6 +44,23 @@ export function createHealthTool(manager) {
                 const text = extractText(result);
                 const hasDF = /[DF]\s*:/i.test(text);
                 const verdict = hasDF ? "CAUTION" : "INFO";
+                // Try to enhance with severity tags if TSA returned structured JSON
+                try {
+                    const parsed = JSON.parse(text);
+                    if (parsed.files) {
+                        parsed.files = parsed.files.map((f) => ({
+                            ...f,
+                            severity: classifySeverity(f.grade, f.dimensions).severity,
+                            domain: classifySeverity(f.grade, f.dimensions).domain,
+                        }));
+                        return makeVerdict(verdict, hasDF ? "Some files scored D–F" : "All files healthy", parsed, {
+                            tool: "boocontext_health",
+                            source: "tree-sitter-analyzer",
+                            duration_ms: Date.now() - start,
+                        });
+                    }
+                }
+                catch { /* TSA returned plain text — pass through raw result unchanged */ }
                 return makeVerdict(verdict, hasDF ? "Some files scored D–F" : "All files healthy", result, {
                     tool: "boocontext_health",
                     source: "tree-sitter-analyzer",

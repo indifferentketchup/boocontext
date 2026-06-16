@@ -13,6 +13,7 @@ import { createSymbolsTool } from "./tools/symbols.js";
 import { createCallgraphTool } from "./tools/callgraph.js";
 import { createImpactTool } from "./tools/impact.js";
 import { createTypesTool } from "./tools/types.js";
+import { createSeverityTool } from "./tools/severity.js";
 let transportMode = "framed";
 function looksLikeFramedTransport(buffer) {
     return /^Content-Length\s*:/i.test(buffer);
@@ -481,6 +482,7 @@ const boocontextTools = [
     createCallgraphTool(childManager),
     createImpactTool(childManager),
     createTypesTool(childManager),
+    createSeverityTool(childManager),
 ];
 for (const tool of boocontextTools) {
     TOOLS.push(tool);
