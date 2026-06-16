@@ -203,12 +203,12 @@ export async function generateProfileConfig(result, root, profile) {
             summaryLines.push(`Routes marked \`[inferred]\` in wiki articles were detected via regex — verify against source before trusting.`);
             summaryLines.push(`If any source file shows ⚠ in the wiki, re-run \`npx boocontext --wiki\` before proceeding.\n`);
             summaryLines.push(`Or use the boocontext MCP server for on-demand queries:`);
-            summaryLines.push(`   - \`boocontext_get_wiki_article\` — read a specific wiki article by name`);
-            summaryLines.push(`   - \`boocontext_get_wiki_index\` — get the wiki index`);
-            summaryLines.push(`   - \`boocontext_get_summary\` — quick project overview`);
-            summaryLines.push(`   - \`boocontext_get_routes --prefix /api/users\` — filtered routes`);
-            summaryLines.push(`   - \`boocontext_get_blast_radius --file src/lib/db.ts\` — impact analysis before changes`);
-            summaryLines.push(`   - \`boocontext_get_schema --model users\` — specific model details`);
+            summaryLines.push(`   - \`boocontext_get {section: "wiki_article", article: "auth"}\` — read a specific wiki article`);
+            summaryLines.push(`   - \`boocontext_get {section: "wiki_index"}\` — get the wiki index`);
+            summaryLines.push(`   - \`boocontext_get {section: "summary"}\` — quick project overview`);
+            summaryLines.push(`   - \`boocontext_get {section: "routes", prefix: "/api/users"}\` — filtered routes`);
+            summaryLines.push(`   - \`boocontext_get {section: "blast_radius", file: "src/lib/db.ts"}\` — impact analysis before changes`);
+            summaryLines.push(`   - \`boocontext_get {section: "schema", model: "users"}\` — specific model details`);
             summaryLines.push(`\nOnly open specific files after consulting boocontext context. This saves ~${result.tokenStats.saved.toLocaleString()} tokens per conversation.`);
             const outPath = join(root, "CLAUDE.md");
             const existing = await fileExists(outPath) ? await readFile(outPath, "utf-8") : "";

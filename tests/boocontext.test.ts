@@ -85,13 +85,13 @@ test("boocontext server reports correct server info", async () => {
   try {
     const response = await initialize(child);
     assert.equal(response.result.serverInfo.name, "boocontext");
-    assert.equal(response.result.serverInfo.version, "1.14.0");
+    assert.equal(response.result.serverInfo.version, "1.15.0");
   } finally {
     await stopServer(child);
   }
 });
 
-test("tools/list includes all 7 boocontext tools", async () => {
+test("tools/list includes all 9 boocontext analysis tools", async () => {
   const child = startServer();
   try {
     await initialize(child);
@@ -109,6 +109,8 @@ test("tools/list includes all 7 boocontext tools", async () => {
     assert.ok(toolNames.includes("boocontext_impact"), "should have impact");
     assert.ok(toolNames.includes("boocontext_symbols"), "should have symbols");
     assert.ok(toolNames.includes("boocontext_health"), "should have health");
+    assert.ok(toolNames.includes("boocontext_severity"), "should have severity");
+    assert.ok(toolNames.includes("boocontext_explore"), "should have explore");
   } finally {
     await stopServer(child);
   }
@@ -140,6 +142,72 @@ test("boocontext_overview returns verdict envelope", async () => {
     assert.equal(envelope.metadata.tool, "boocontext_overview");
     assert.equal(envelope.metadata.source, "boocontext");
     assert.ok(typeof envelope.metadata.duration_ms === "number");
+  } finally {
+    await stopServer(child);
+  }
+});
+
+test("tools/list advertises boocontext_get and hides the legacy getters", async () => {
+  const child = startServer();
+  try {
+    await initialize(child);
+    writeFramedMessage(child, { jsonrpc: "2.0", id: 2, method: "tools/list" });
+    const response = await readFramedResponse(child);
+    const toolNames: string[] = response.result.tools.map((t: any) => t.name);
+
+    assert.ok(toolNames.includes("boocontext_get"), "should advertise consolidated boocontext_get");
+    const leaked = toolNames.filter((n) => n.startsWith("boocontext_get_") || n === "boocontext_lint_wiki");
+    assert.deepEqual(leaked, [], `legacy getters must not be listed, found: ${leaked.join(", ")}`);
+    assert.equal(toolNames.length, 12, `expected 12 advertised tools, got ${toolNames.length}: ${toolNames.join(", ")}`);
+  } finally {
+    await stopServer(child);
+  }
+});
+
+test("legacy getter alias is byte-identical to boocontext_get with a section", async () => {
+  const child = startServer();
+  try {
+    await initialize(child);
+    writeFramedMessage(child, {
+      jsonrpc: "2.0",
+      id: 3,
+      method: "tools/call",
+      params: { name: "boocontext_get", arguments: { section: "summary", directory: projectRoot } },
+    });
+    const viaSection = await readFramedResponse(child, 10000);
+
+    writeFramedMessage(child, {
+      jsonrpc: "2.0",
+      id: 4,
+      method: "tools/call",
+      params: { name: "boocontext_get_summary", arguments: { directory: projectRoot } },
+    });
+    const viaAlias = await readFramedResponse(child, 10000);
+
+    assert.equal(
+      viaAlias.result.content[0].text,
+      viaSection.result.content[0].text,
+      "alias output must match boocontext_get {section: summary}",
+    );
+  } finally {
+    await stopServer(child);
+  }
+});
+
+test("boocontext_get with an unknown section returns a helpful error", async () => {
+  const child = startServer();
+  try {
+    await initialize(child);
+    writeFramedMessage(child, {
+      jsonrpc: "2.0",
+      id: 5,
+      method: "tools/call",
+      params: { name: "boocontext_get", arguments: { section: "nonsense", directory: projectRoot } },
+    });
+    const response = await readFramedResponse(child, 10000);
+    const text: string = response.result.content[0].text;
+    assert.match(text, /Unknown section/);
+    assert.match(text, /Valid sections/);
   } finally {
     await stopServer(child);
   }

@@ -1,6 +1,6 @@
 {
   "name": "boocontext",
-  "version": "1.14.0",
+  "version": "1.15.0",
   "description": "Unified MCP codebase context server. Aggregates boocontext project-scanner capabilities with deep analysis (call graphs, health grades, type recovery) via child MCP servers.",
   "main": "dist/index.js",
   "bin": {

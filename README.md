@@ -4,7 +4,7 @@
 
 **4,000+ downloads and counting.**
 
-**Zero dependencies. AST precision. 30+ framework detectors. 13 ORM parsers. 13 MCP tools. One `npx` call.**
+**Zero dependencies. AST precision. 30+ framework detectors. 13 ORM parsers. 12 MCP tools. One `npx` call.**
 
 **Works with TypeScript, JavaScript, Python, Go, Ruby, Elixir, Java, Kotlin, Rust, PHP, Dart, Swift, C#, and BrightScript/BrighterScript (Roku).** TypeScript projects get full AST precision. Everything else uses battle-tested regex detection across the same 30+ frameworks.
 
@@ -30,7 +30,7 @@
 ---
 
 ```
-0 dependencies · Node.js >= 18 · 27 tests · 13 MCP tools · MIT · tested on 25+ OSS projects across 14 languages
+0 dependencies · Node.js >= 18 · 27 tests · 12 MCP tools · MIT · tested on 25+ OSS projects across 14 languages
 ```
 
 ## Works With
@@ -49,7 +49,7 @@ That's it. Run it in any project root. No config, no setup, no API keys.
 npx boocontext --wiki                       # Generate wiki knowledge base (.boocontext/wiki/)
 npx boocontext --init                       # Generate CLAUDE.md, .cursorrules, codex.md, AGENTS.md
 npx boocontext --open                       # Open interactive HTML report in browser
-npx boocontext --mcp                        # Start as MCP server (13 tools) for Claude Code / Cursor
+npx boocontext --mcp                        # Start as MCP server (12 tools) for Claude Code / Cursor
 npx boocontext --blast src/lib/db.ts        # Show blast radius for a file
 npx boocontext --profile claude-code        # Generate optimized config for a specific AI tool
 npx boocontext --benchmark                  # Show detailed token savings breakdown
@@ -93,13 +93,13 @@ Instead of loading the full 5K token context map every conversation, your AI rea
 
 **Auto-regenerates.** Use `--watch` to keep the wiki current as you code. Use `--hook` to regenerate on every commit.
 
-**3 new MCP tools** for wiki access:
+**Wiki access via the consolidated `boocontext_get` tool:**
 
-| Tool | What it does |
+| Call | What it does |
 |---|---|
-| `boocontext_get_wiki_index` | Get the wiki catalog (~200 tokens) at session start |
-| `boocontext_get_wiki_article` | Read one article by name: `auth`, `database`, `payments`, etc. |
-| `boocontext_lint_wiki` | Health check: orphan articles, missing cross-links, stale content |
+| `boocontext_get {section: "wiki_index"}` | Get the wiki catalog (~200 tokens) at session start |
+| `boocontext_get {section: "wiki_article", article: "auth"}` | Read one article by name: `auth`, `database`, `payments`, etc. |
+| `boocontext_get {section: "wiki_lint"}` | Health check: orphan articles, missing cross-links, stale content |
 
 The key difference from general-purpose wiki tools: boocontext already knows your routes, schema, blast radius, and middleware from AST — no LLM needed to extract code structure. The wiki is a narrative layer on top of data your codebase already contains.
 
@@ -590,7 +590,7 @@ Generates ready-to-use instruction files for every major AI coding tool at once:
 
 Each file is pre-filled with your project's stack, architecture, high-impact files, and required env vars. Your AI reads it on startup and starts with full context from the first message.
 
-## MCP Server (13 Tools)
+## MCP Server (12 Tools)
 
 ```bash
 npx boocontext --mcp
@@ -624,21 +624,15 @@ startup_timeout_sec = 60
 
 | Tool | What it does |
 |---|---|
-| `boocontext_get_wiki_index` | Wiki catalog (~200 tokens) — read at session start |
-| `boocontext_get_wiki_article` | Read one wiki article by name: `auth`, `database`, `payments`, etc. |
-| `boocontext_lint_wiki` | Health check: orphan articles, missing cross-links |
 | `boocontext_scan` | Full project scan (~3K-5K tokens) |
-| `boocontext_get_summary` | Compact overview (~500 tokens) |
-| `boocontext_get_routes` | Routes filtered by prefix, tag, or method |
-| `boocontext_get_schema` | Schema filtered by model name |
-| `boocontext_get_blast_radius` | Impact analysis before changing a file |
-| `boocontext_get_env` | Environment variables (filter: required only) |
-| `boocontext_get_hot_files` | Most imported files with configurable limit |
-| `boocontext_get_events` | Background events: BullMQ queues, Celery tasks, Kafka topics, Redis pub/sub, EventEmitter |
-| `boocontext_get_coverage` | Test coverage map: which routes and models have test files |
+| `boocontext_get` | Retrieve any context slice via `section`: `summary`, `routes`, `schema`, `env`, `hot_files`, `events`, `coverage`, `blast_radius`, `wiki_index`, `wiki_article`, `wiki_lint`, `knowledge` (plus per-section filters like `prefix`, `tag`, `model`, `file`, `article`) |
 | `boocontext_refresh` | Force re-scan (results are cached per session) |
+| `boocontext_overview` / `boocontext_map` | High-level project context maps |
+| `boocontext_health` / `boocontext_severity` | Code health grades and severity-ranked hotspots |
+| `boocontext_symbols` / `boocontext_callgraph` / `boocontext_impact` / `boocontext_types` | Symbol search, call graph, impact, and type recovery |
+| `boocontext_explore` | Query-first: map a natural-language question to ranked file citations |
 
-Your AI asks for exactly what it needs instead of loading the entire context map. Session caching means the first call scans, subsequent calls return instantly.
+Your AI asks for exactly what it needs instead of loading the entire context map. Session caching means the first call scans, subsequent calls return instantly. The legacy `boocontext_get_*` tool names still work as hidden aliases for backward compatibility.
 
 ## AI Tool Profiles
 
@@ -709,7 +703,7 @@ npx boocontext --wiki                       # Generate wiki knowledge base
 npx boocontext --init                       # Generate AI config files
 npx boocontext --open                       # Open visual HTML report
 npx boocontext --html                       # Generate HTML report without opening
-npx boocontext --mcp                        # Start MCP server (13 tools)
+npx boocontext --mcp                        # Start MCP server (12 tools)
 npx boocontext --blast src/lib/db.ts        # Show blast radius for a file
 npx boocontext --profile claude-code        # Optimized config for specific tool
 npx boocontext --watch                      # Watch mode (add --wiki to auto-regenerate wiki)

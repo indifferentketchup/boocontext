@@ -14,6 +14,7 @@ import { createCallgraphTool } from "./tools/callgraph.js";
 import { createImpactTool } from "./tools/impact.js";
 import { createTypesTool } from "./tools/types.js";
 import { createSeverityTool } from "./tools/severity.js";
+import { createExploreTool } from "./tools/explore.js";
 let transportMode = "framed";
 function looksLikeFramedTransport(buffer) {
     return /^Content-Length\s*:/i.test(buffer);
@@ -190,7 +191,7 @@ async function toolGetSummary(args) {
             .join(", ")}${required.length > 8 ? ` +${required.length - 8} more` : ""}`);
     }
     lines.push("");
-    lines.push("Use boocontext_get_routes, boocontext_get_schema, boocontext_get_blast_radius for details.");
+    lines.push("Use boocontext_get with section=routes, schema, or blast_radius for details.");
     return lines.join("\n");
 }
 async function toolRefresh(args) {
@@ -205,7 +206,7 @@ async function toolGetWikiIndex(args) {
     if (index)
         return index;
     // Wiki not generated yet — return a summary pointing to --wiki
-    return `Wiki not generated yet. Run \`npx boocontext --wiki\` to generate the knowledge base.\n\nFor now, use boocontext_get_summary for a quick overview.\n\nProject: ${result.project.name} | ${result.routes.length} routes | ${result.schemas.length} models`;
+    return `Wiki not generated yet. Run \`npx boocontext --wiki\` to generate the knowledge base.\n\nFor now, use boocontext_get with section=summary for a quick overview.\n\nProject: ${result.project.name} | ${result.routes.length} routes | ${result.schemas.length} models`;
 }
 async function toolGetWikiArticle(args) {
     if (!args.article)
@@ -299,6 +300,32 @@ async function toolGetKnowledge(args) {
     }
 }
 // =================== TOOL DEFINITIONS ===================
+const GETTER_SECTIONS = {
+    summary: toolGetSummary,
+    routes: toolGetRoutes,
+    schema: toolGetSchema,
+    env: toolGetEnv,
+    hot_files: toolGetHotFiles,
+    events: toolGetEvents,
+    coverage: toolGetCoverage,
+    blast_radius: toolGetBlastRadius,
+    wiki_index: toolGetWikiIndex,
+    wiki_article: toolGetWikiArticle,
+    wiki_lint: toolLintWiki,
+    knowledge: toolGetKnowledge,
+};
+const GETTER_SECTION_NAMES = Object.keys(GETTER_SECTIONS);
+// Legacy getter tools stay callable via tools/call but are hidden from tools/list,
+// shrinking the advertised surface while keeping existing integrations working.
+const HIDDEN_FROM_LIST = new Set(GETTER_SECTION_NAMES.map((s) => `boocontext_${s === "wiki_lint" ? "lint_wiki" : `get_${s}`}`));
+async function toolGet(args) {
+    const section = args?.section;
+    const fn = section ? GETTER_SECTIONS[section] : undefined;
+    if (!fn) {
+        return `Unknown section '${section ?? ""}'. Valid sections: ${GETTER_SECTION_NAMES.join(", ")}.`;
+    }
+    return fn(args);
+}
 const TOOLS = [
     {
         name: "boocontext_scan",
@@ -310,6 +337,34 @@ const TOOLS = [
             },
         },
         handler: toolScan,
+    },
+    {
+        name: "boocontext_get",
+        description: "Retrieve any precompiled context slice in one call. Pick a `section`: summary (project overview, start here) | routes (API endpoints, filter by prefix/tag/method) | schema (DB models, filter by model) | env (environment vars) | hot_files (most-imported files) | events (queues/topics/pub-sub) | coverage (test coverage) | blast_radius (impact of changing a file, needs file/files) | wiki_index | wiki_article (needs article) | wiki_lint | knowledge. Replaces the individual boocontext_get_* tools.",
+        inputSchema: {
+            type: "object",
+            properties: {
+                section: {
+                    type: "string",
+                    enum: GETTER_SECTION_NAMES,
+                    description: "Which context slice to retrieve",
+                },
+                directory: { type: "string", description: "Directory (defaults to cwd)" },
+                prefix: { type: "string", description: "routes: filter by path prefix (e.g. '/api/users')" },
+                tag: { type: "string", description: "routes: filter by tag (e.g. 'auth', 'payment')" },
+                method: { type: "string", description: "routes: filter by HTTP method" },
+                model: { type: "string", description: "schema: filter by model name (partial match)" },
+                required_only: { type: "boolean", description: "env: only vars without defaults" },
+                limit: { type: "number", description: "hot_files: number of files (default 15)" },
+                system: { type: "string", description: "events: filter by system (bullmq|kafka|celery|...)" },
+                file: { type: "string", description: "blast_radius: single file path" },
+                files: { type: "array", items: { type: "string" }, description: "blast_radius: multiple file paths" },
+                depth: { type: "number", description: "blast_radius: max traversal depth (default 3)" },
+                article: { type: "string", description: "wiki_article: article name without .md (e.g. 'auth')" },
+            },
+            required: ["section"],
+        },
+        handler: toolGet,
     },
     {
         name: "boocontext_get_summary",
@@ -483,6 +538,7 @@ const boocontextTools = [
     createImpactTool(childManager),
     createTypesTool(childManager),
     createSeverityTool(childManager),
+    createExploreTool(childManager),
 ];
 for (const tool of boocontextTools) {
     TOOLS.push(tool);
@@ -497,7 +553,7 @@ async function handleRequest(req) {
             result: {
                 protocolVersion: "2024-11-05",
                 capabilities: { tools: {} },
-                serverInfo: { name: "boocontext", version: "1.14.0" },
+                serverInfo: { name: "boocontext", version: "1.15.0" },
             },
         });
         return;
@@ -510,7 +566,7 @@ async function handleRequest(req) {
             jsonrpc: "2.0",
             id: req.id ?? null,
             result: {
-                tools: TOOLS.map(({ name, description, inputSchema }) => ({
+                tools: TOOLS.filter((t) => !HIDDEN_FROM_LIST.has(t.name)).map(({ name, description, inputSchema }) => ({
                     name,
                     description,
                     inputSchema,

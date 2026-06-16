@@ -162,10 +162,12 @@
   - interface TelemetryTask
   - interface TelemetryReport
 - `src/tools/callgraph.ts` — function createCallgraphTool: (manager) => void
+- `src/tools/explore.ts` — function createExploreTool: (manager) => void, interface Citation
 - `src/tools/health.ts` — function createHealthTool: (manager) => void
 - `src/tools/impact.ts` — function createImpactTool: (manager) => void
 - `src/tools/map.ts` — function createMapTool: () => void
 - `src/tools/overview.ts` — function createOverviewTool: () => void
+- `src/tools/severity.ts` — function createSeverityTool: (manager) => void
 - `src/tools/symbols.ts` — function createSymbolsTool: (manager) => void
 - `src/tools/types.ts` — function createTypesTool: (manager) => void
 - `src/verdict.ts`
