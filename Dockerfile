@@ -2,8 +2,8 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml* ./
-RUN corepack enable pnpm && pnpm install --prod --frozen-lockfile 2>/dev/null || npm install --omit=dev
+COPY package.json ./
+RUN npm install --omit=dev --ignore-scripts
 
 COPY dist/ ./dist/
 COPY assets/ ./assets/
