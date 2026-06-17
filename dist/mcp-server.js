@@ -5,6 +5,7 @@ import { writeOutput } from "./formatter.js";
 import { readWikiArticle, listWikiArticles, lintWiki } from "./generators/wiki.js";
 import { loadConfig } from "./config.js";
 import { getScanResult, clearCache } from "./scan-cache.js";
+import { VERSION } from "./core.js";
 import { ChildServerManager } from "./child-server.js";
 import { createOverviewTool } from "./tools/overview.js";
 import { createMapTool } from "./tools/map.js";
@@ -553,7 +554,7 @@ async function handleRequest(req) {
             result: {
                 protocolVersion: "2024-11-05",
                 capabilities: { tools: {} },
-                serverInfo: { name: "boocontext", version: "1.15.0" },
+                serverInfo: { name: "boocontext", version: VERSION },
             },
         });
         return;

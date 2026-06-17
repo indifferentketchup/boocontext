@@ -1,7 +1,8 @@
 {
   "name": "boocontext",
-  "version": "1.15.0",
-  "description": "Unified MCP codebase context server. Aggregates boocontext project-scanner capabilities with deep analysis (call graphs, health grades, type recovery) via child MCP servers.",
+  "version": "1.16.0",
+  "description": "MCP codebase context server: routes, schema, call graphs, health, type recovery. AST precision, one npx call.",
+  "type": "module",
   "main": "dist/index.js",
   "bin": {
     "boocontext": "dist/index.js",
@@ -12,85 +13,58 @@
     "./plugins/terraform": "./dist/plugins/terraform/index.js",
     "./dist/*": "./dist/*"
   },
-  "type": "module",
-  "scripts": {
-    "build": "tsc",
-    "prepare": "tsc",
-    "dev": "tsx src/index.ts",
-    "test": "pnpm build && tsx --test tests/*.test.ts",
-    "prepublishOnly": "pnpm build",
-    "compile": "bun build ./src/index.ts --target=bun --outfile=boocontext --compile"
-  },
-  "keywords": [
-    "ai",
-    "cli",
-    "context",
-    "codebase",
-    "claude",
-    "cursor",
-    "copilot",
-    "codex",
-    "windsurf",
-    "cline",
-    "developer-tools",
-    "code-analysis",
-    "llm",
-    "anthropic",
-    "openai",
-    "mcp",
-    "context-engineering",
-    "token-savings",
-    "repo-map"
-  ],
-  "author": {
-    "name": "Kailesk Khumar",
-    "email": "kailesk@houseofmvps.com",
-    "url": "https://www.kailxlabs.co"
-  },
-  "contributors": [
-    {
-      "name": "HouseofMVPs",
-      "url": "https://houseofmvps.com"
-    },
-    {
-      "name": "Kailxlabs",
-      "url": "https://www.kailxlabs.co"
-    }
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Houseofmvps/boocontext"
-  },
-  "homepage": "https://github.com/Houseofmvps/boocontext#readme",
-  "bugs": {
-    "url": "https://github.com/Houseofmvps/boocontext/issues"
-  },
-  "funding": [
-    {
-      "type": "github",
-      "url": "https://github.com/sponsors/Houseofmvps"
-    },
-    {
-      "type": "individual",
-      "url": "https://www.kailxlabs.co"
-    }
-  ],
-  "devDependencies": {
-    "@types/node": "^22.0.0",
-    "tsx": "^4.19.0",
-    "typescript": "^5.7.0"
-  },
-  "engines": {
-    "node": ">=18.0.0",
-    "bun": ">=1.0.0"
-  },
   "files": [
     "dist",
     "eval",
     "assets"
   ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "test": "npm run build && tsx --test tests/*.test.ts",
+    "compile": "bun build ./src/index.ts --target=bun --outfile=boocontext --compile",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "boocontext",
+    "context",
+    "mcp",
+    "model-context-protocol",
+    "codebase-context",
+    "code-analysis",
+    "code-intelligence",
+    "static-analysis",
+    "ast",
+    "repo-map",
+    "call-graph",
+    "ai-agents",
+    "ai-context",
+    "developer-tools",
+    "cli"
+  ],
+  "author": "indifferentketchup <sam@indifferentketchup.com>",
+  "contributors": [
+    "Kailesk Khumar (HouseofMVPs, https://houseofmvps.com)"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/indifferentketchup/boocontext.git"
+  },
+  "homepage": "https://github.com/indifferentketchup/boocontext#readme",
+  "bugs": {
+    "url": "https://github.com/indifferentketchup/boocontext/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "bun": ">=1.0.0"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
   }
 }

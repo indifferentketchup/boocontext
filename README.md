@@ -2,35 +2,28 @@
 
 ### Your AI assistant wastes thousands of tokens every conversation just figuring out your project. boocontext fixes that in one command.
 
-**4,000+ downloads and counting.**
-
-**Zero dependencies. AST precision. 30+ framework detectors. 13 ORM parsers. 12 MCP tools. One `npx` call.**
+**AST precision. 30+ framework detectors. 13 ORM parsers. 12 MCP tools. One `npx` call.**
 
 **Works with TypeScript, JavaScript, Python, Go, Ruby, Elixir, Java, Kotlin, Rust, PHP, Dart, Swift, C#, and BrightScript/BrighterScript (Roku).** TypeScript projects get full AST precision. Everything else uses battle-tested regex detection across the same 30+ frameworks.
 
 [![npm version](https://img.shields.io/npm/v/boocontext?style=for-the-badge&logo=npm&color=CB3837)](https://www.npmjs.com/package/boocontext)
 [![npm downloads](https://img.shields.io/npm/dm/boocontext?style=for-the-badge&logo=npm&color=blue&label=Monthly%20Downloads)](https://www.npmjs.com/package/boocontext)
 [![npm total](https://img.shields.io/npm/dt/boocontext?style=for-the-badge&logo=npm&color=cyan&label=Total%20Downloads)](https://www.npmjs.com/package/boocontext)
-[![GitHub stars](https://img.shields.io/github/stars/Houseofmvps/boocontext?style=for-the-badge&logo=github&color=gold)](https://github.com/Houseofmvps/boocontext/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/indifferentketchup/boocontext?style=for-the-badge&logo=github&color=gold)](https://github.com/indifferentketchup/boocontext/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge&logo=opensourceinitiative)](LICENSE)
 
 ---
 
-[![Follow @kaileskkhumar](https://img.shields.io/badge/Follow%20%40kaileskkhumar-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/kaileskkhumar)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/kailesk-khumar)
-[![houseofmvps.com](https://img.shields.io/badge/houseofmvps.com-Website-green?style=for-the-badge&logo=google-chrome&logoColor=white)](https://houseofmvps.com)
-[![kailxlabs.co](https://img.shields.io/badge/kailxlabs.co-Website-6366F1?style=for-the-badge&logo=google-chrome&logoColor=white)](https://www.kailxlabs.co)
-
-**Built by [Kailesk Khumar](https://www.linkedin.com/in/kailesk-khumar), founder of [HouseofMVPs](https://houseofmvps.com) and [Kailxlabs](https://www.kailxlabs.co)**
-
-*Also: [ultraship](https://github.com/Houseofmvps/ultraship) (39 expert skills for Claude Code) · [claude-rank](https://github.com/Houseofmvps/claude-rank) (SEO/GEO/AEO plugin for Claude Code)*
+**Maintained by [indifferentketchup](https://github.com/indifferentketchup)** · `sam@indifferentketchup.com`
 
 </div>
+
+> **Fork notice.** This is an independently maintained fork of the original **boocontext**, created by [**Kailesk Khumar**](https://www.linkedin.com/in/kailesk-khumar) ([HouseofMVPs](https://houseofmvps.com) · [Kailxlabs](https://www.kailxlabs.co)). Original work © 2026 Kailesk Khumar, released under the MIT License. This fork retains that copyright and adds changes under the same license; see [LICENSE](LICENSE).
 
 ---
 
 ```
-0 dependencies · Node.js >= 18 · 27 tests · 12 MCP tools · MIT · tested on 25+ OSS projects across 14 languages
+1 runtime dependency · Node.js >= 18 · 135 tests · 12 MCP tools · MIT · tested on 25+ OSS projects across 14 languages
 ```
 
 ## Works With
@@ -729,10 +722,10 @@ npx boocontext -d 5                         # Limit directory depth
 | **Schema parsing** | 8 ORMs with field types and relations | None | Varies |
 | **Blast radius** | BFS through import graph | None | Yes |
 | **AI tool profiles** | 5 tools (Claude, Cursor, Codex, Copilot, Windsurf) | None | Auto-detect |
-| **MCP tools** | 11 specialized tools with session caching | None | 22 tools |
-| **Setup** | `npx boocontext` (zero deps, zero config) | Copy/paste | `pip install` + optional deps |
-| **Dependencies** | Zero (borrows TS from your project) | Varies | Tree-sitter, SQLite, NetworkX, etc. |
-| **Language** | TypeScript (zero runtime deps) | Varies | Python |
+| **MCP tools** | 12 consolidated tools with session caching | None | 22 tools |
+| **Setup** | `npx boocontext` (one dep, zero config) | Copy/paste | `pip install` + optional deps |
+| **Dependencies** | 1 runtime (the MCP SDK; borrows TS from your project) | Varies | Tree-sitter, SQLite, NetworkX, etc. |
+| **Language** | TypeScript (1 runtime dep) | Varies | Python |
 | **Scan time** | 185-290ms (small), 0.9-2.8s (10K files) | Varies | Under 2s reported |
 
 boocontext is purpose-built for the problem most developers actually have: giving their AI assistant enough context to be useful without wasting tokens on file exploration. It focuses on structured extraction (routes, schema, components, dependencies) rather than general-purpose code graph analysis.
@@ -740,26 +733,26 @@ boocontext is purpose-built for the problem most developers actually have: givin
 ## Contributing
 
 ```bash
-git clone https://github.com/Houseofmvps/boocontext.git
+git clone https://github.com/indifferentketchup/boocontext.git
 cd boocontext
-pnpm install
-pnpm dev              # Run locally
-pnpm build            # Compile TypeScript
-pnpm test             # Run 27 tests
+npm install
+npm run dev            # Run locally
+npm run build          # Compile TypeScript
+npm test               # Run the test suite
 ```
 
 PRs welcome. Open an issue first for large changes.
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE). Original work © 2026 Kailesk Khumar (HouseofMVPs); fork changes © 2026 indifferentketchup.
 
 ---
 
 <div align="center">
 
-If boocontext saves you tokens, [star it on GitHub](https://github.com/Houseofmvps/boocontext) so others find it too.
+If boocontext saves you tokens, [star it on GitHub](https://github.com/indifferentketchup/boocontext) so others find it too.
 
-[![GitHub stars](https://img.shields.io/github/stars/Houseofmvps/boocontext?style=for-the-badge&logo=github&color=gold)](https://github.com/Houseofmvps/boocontext/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/indifferentketchup/boocontext?style=for-the-badge&logo=github&color=gold)](https://github.com/indifferentketchup/boocontext/stargazers)
 
 </div>

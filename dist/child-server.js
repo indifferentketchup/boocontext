@@ -53,10 +53,12 @@ export class ChildServerManager {
             this.servers.delete(config.name);
         };
         const client = new Client({ name: "boocontext", version: "1.0.0" }, { capabilities: {} });
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(new Error(`Connect timeout after ${CONNECT_TIMEOUT_MS}ms`)), CONNECT_TIMEOUT_MS);
+        let timer;
+        const connectTimeout = new Promise((_, reject) => {
+            timer = setTimeout(() => reject(new Error(`Connect timeout after ${CONNECT_TIMEOUT_MS}ms`)), CONNECT_TIMEOUT_MS);
+        });
         try {
-            await client.connect(transport);
+            await Promise.race([client.connect(transport), connectTimeout]);
         }
         catch (err) {
             transport.close();
@@ -117,8 +119,8 @@ export class ChildServerManager {
 export const CHILD_SERVER_CONFIGS = [
     {
         name: "tree-sitter-analyzer",
-        command: "uvx",
-        args: ["--from", "tree-sitter-analyzer[mcp]", "tree-sitter-analyzer-mcp"],
+        command: TREE_SITTER_CMD,
+        args: TREE_SITTER_ARGS,
         tools: ["health", "search", "nav", "project", "index", "structure", "viz"],
     },
     {

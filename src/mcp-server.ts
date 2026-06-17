@@ -5,6 +5,7 @@ import { writeOutput } from "./formatter.js";
 import { readWikiArticle, listWikiArticles, lintWiki } from "./generators/wiki.js";
 import { loadConfig } from "./config.js";
 import { getScanResult, clearCache } from "./scan-cache.js";
+import { VERSION } from "./core.js";
 import { ChildServerManager } from "./child-server.js";
 import type { ToolDefinition } from "./tools/index.js";
 import { createOverviewTool } from "./tools/overview.js";
@@ -654,7 +655,7 @@ async function handleRequest(req: JsonRpcRequest) {
       result: {
         protocolVersion: "2024-11-05",
         capabilities: { tools: {} },
-        serverInfo: { name: "boocontext", version: "1.15.0" },
+        serverInfo: { name: "boocontext", version: VERSION },
       },
     });
     return;

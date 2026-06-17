@@ -3,11 +3,13 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import { createRequire } from "node:module";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const projectRoot = resolve(__dirname, "..");
 const entrypoint = resolve(projectRoot, "dist/index.js");
+const { version: PKG_VERSION } = createRequire(import.meta.url)("../package.json") as { version: string };
 
 function startServer() {
   return spawn("node", [entrypoint, "--mcp"], {
@@ -85,7 +87,7 @@ test("boocontext server reports correct server info", async () => {
   try {
     const response = await initialize(child);
     assert.equal(response.result.serverInfo.name, "boocontext");
-    assert.equal(response.result.serverInfo.version, "1.15.0");
+    assert.equal(response.result.serverInfo.version, PKG_VERSION);
   } finally {
     await stopServer(child);
   }

@@ -88,11 +88,13 @@ export class ChildServerManager {
       { capabilities: {} },
     );
 
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(new Error(`Connect timeout after ${CONNECT_TIMEOUT_MS}ms`)), CONNECT_TIMEOUT_MS);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const connectTimeout = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => reject(new Error(`Connect timeout after ${CONNECT_TIMEOUT_MS}ms`)), CONNECT_TIMEOUT_MS);
+    });
 
     try {
-      await client.connect(transport);
+      await Promise.race([client.connect(transport), connectTimeout]);
     } catch (err: any) {
       transport.close();
       const msg = `Failed to connect to "${config.name}": ${err.message}`;
@@ -157,8 +159,8 @@ export class ChildServerManager {
 export const CHILD_SERVER_CONFIGS: ChildServerConfig[] = [
   {
     name: "tree-sitter-analyzer",
-    command: "uvx",
-    args: ["--from", "tree-sitter-analyzer[mcp]", "tree-sitter-analyzer-mcp"],
+    command: TREE_SITTER_CMD,
+    args: TREE_SITTER_ARGS,
     tools: ["health", "search", "nav", "project", "index", "structure", "viz"],
   },
   {

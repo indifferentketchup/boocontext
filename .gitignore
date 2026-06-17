@@ -1,0 +1,9 @@
+node_modules/
+*.log
+.DS_Store
+
+# Bun single-file compile output
+/boocontext
+
+# local scan output
+.boocontext/
