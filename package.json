@@ -4,6 +4,7 @@
   "description": "Unified MCP codebase context server. Aggregates boocontext project-scanner capabilities with deep analysis (call graphs, health grades, type recovery) via child MCP servers.",
   "main": "dist/index.js",
   "bin": {
+    "boocontext": "dist/index.js",
     "boocontext-mcp": "dist/index.js"
   },
   "exports": {
@@ -17,7 +18,8 @@
     "prepare": "tsc",
     "dev": "tsx src/index.ts",
     "test": "pnpm build && tsx --test tests/*.test.ts",
-    "prepublishOnly": "pnpm build"
+    "prepublishOnly": "pnpm build",
+    "compile": "bun build ./src/index.ts --target=bun --outfile=boocontext --compile"
   },
   "keywords": [
     "ai",
@@ -80,7 +82,8 @@
     "typescript": "^5.7.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "bun": ">=1.0.0"
   },
   "files": [
     "dist",

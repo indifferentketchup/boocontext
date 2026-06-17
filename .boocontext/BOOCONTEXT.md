@@ -4,7 +4,7 @@
 
 > 4 routes (8 inferred) + 1 graphql + 3 ws | 0 models | 0 components | 74 lib files | 8 env vars | 5 middleware | 15 events
 > **Token savings:** this file is ~0 tokens. Without it, AI exploration would cost ~0 tokens. **Saves ~0 tokens per conversation.**
-> **Last scanned:** 2026-06-16 16:47 — re-run after significant changes
+> **Last scanned:** 2026-06-17 05:32 — re-run after significant changes
 
 ---
 
@@ -222,6 +222,7 @@
 
 ## Config Files
 
+- `Dockerfile`
 - `tests/fixtures/config-app/.env.example`
 - `tsconfig.json`
 

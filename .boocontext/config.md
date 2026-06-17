@@ -13,5 +13,6 @@
 
 ## Config Files
 
+- `Dockerfile`
 - `tests/fixtures/config-app/.env.example`
 - `tsconfig.json`
