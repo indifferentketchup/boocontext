@@ -1,6 +1,6 @@
 {
   "name": "boocontext",
-  "version": "1.16.0",
+  "version": "1.16.1",
   "description": "MCP codebase context server: routes, schema, call graphs, health, type recovery. AST precision, one npx call.",
   "type": "module",
   "main": "dist/index.js",

@@ -7,3 +7,7 @@ node_modules/
 
 # local scan output
 .boocontext/
+
+# Keep CI/CD detector test fixtures even though a global gitignore may exclude .github/
+!tests/fixtures/**/.github/
+!tests/fixtures/**/.github/**

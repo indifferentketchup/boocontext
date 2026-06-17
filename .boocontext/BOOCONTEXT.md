@@ -4,7 +4,7 @@
 
 > 4 routes (8 inferred) + 1 graphql + 3 ws | 0 models | 0 components | 74 lib files | 8 env vars | 5 middleware | 15 events
 > **Token savings:** this file is ~0 tokens. Without it, AI exploration would cost ~0 tokens. **Saves ~0 tokens per conversation.**
-> **Last scanned:** 2026-06-17 05:32 — re-run after significant changes
+> **Last scanned:** 2026-06-17 12:03 — re-run after significant changes
 
 ---
 
@@ -256,6 +256,7 @@
 - `src/scan-cache.ts` — imported by **5** files
 - `src/plugins/cicd/types.ts` — imported by **5** files
 - `src/plugins/githooks/types.ts` — imported by **5** files
+- `src/core.ts` — imported by **4** files
 - `src/detectors/routes.ts` — imported by **3** files
 - `src/detectors/schema.ts` — imported by **3** files
 - `src/detectors/components.ts` — imported by **3** files
@@ -264,7 +265,6 @@
 - `src/ast/extract-dart.ts` — imported by **3** files
 - `src/ast/extract-swift.ts` — imported by **3** files
 - `src/ast/extract-android.ts` — imported by **3** files
-- `src/ast/extract-scenegraph.ts` — imported by **3** files
 
 ## Import Map (who imports what)
 

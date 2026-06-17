@@ -13,6 +13,7 @@
 - `src/scan-cache.ts` — imported by **5** files
 - `src/plugins/cicd/types.ts` — imported by **5** files
 - `src/plugins/githooks/types.ts` — imported by **5** files
+- `src/core.ts` — imported by **4** files
 - `src/detectors/routes.ts` — imported by **3** files
 - `src/detectors/schema.ts` — imported by **3** files
 - `src/detectors/components.ts` — imported by **3** files
@@ -21,7 +22,6 @@
 - `src/ast/extract-dart.ts` — imported by **3** files
 - `src/ast/extract-swift.ts` — imported by **3** files
 - `src/ast/extract-android.ts` — imported by **3** files
-- `src/ast/extract-scenegraph.ts` — imported by **3** files
 
 ## Import Map (who imports what)
 
