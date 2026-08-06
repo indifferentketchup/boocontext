@@ -24,6 +24,17 @@ async function fileExists(path: string): Promise<boolean> {
 }
 
 /**
+ * Executing config code from the scanned project is a code-execution vector
+ * when scanning untrusted repos. It is disabled by default and requires an
+ * explicit opt-in via the `--allow-config-exec` CLI flag (or the
+ * BOOCONTEXT_ALLOW_CONFIG_EXEC=1 environment variable).
+ */
+function allowConfigExec(): boolean {
+  const v = process.env.BOOCONTEXT_ALLOW_CONFIG_EXEC;
+  return v === "1" || v?.toLowerCase() === "true";
+}
+
+/**
  * Load config from project root. Returns empty config if no config file found.
  */
 export async function loadConfig(root: string): Promise<BoocontextConfig> {
@@ -35,6 +46,20 @@ export async function loadConfig(root: string): Promise<BoocontextConfig> {
       if (filename.endsWith(".json")) {
         const content = await readFile(configPath, "utf-8");
         return JSON.parse(content) as BoocontextConfig;
+      }
+
+      // JS/MJS/TS configs are code. Without explicit opt-in, never execute
+      // them; parse the safe subset (plain object literal) instead.
+      if (!allowConfigExec()) {
+        const content = await readFile(configPath, "utf-8");
+        const parsed = safeParseConfigText(content);
+        if (Object.keys(parsed).length > 0) return parsed;
+        console.warn(
+          "  Warning: " + filename + " requires code execution, which is disabled by default. " +
+          "Set BOOCONTEXT_ALLOW_CONFIG_EXEC=1 (or pass --allow-config-exec) to enable it, " +
+          "or use boocontext.config.json."
+        );
+        return {};
       }
 
       if (filename.endsWith(".ts")) {

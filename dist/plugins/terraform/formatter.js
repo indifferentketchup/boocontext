@@ -1,3 +1,8 @@
+import { isSensitiveKey, looksLikeSecretValue, REDACTED } from "./extractor.js";
+/** Defensive redaction at format time: never emit credential-shaped values. */
+function safeValue(name, value) {
+    return isSensitiveKey(name) || looksLikeSecretValue(value) ? REDACTED : value;
+}
 /**
  * Generate infrastructure.md content from extracted service infrastructure.
  */
@@ -33,7 +38,7 @@ export function formatInfrastructure(infra) {
         lines.push("| Name | Value | Source |");
         lines.push("|------|-------|--------|");
         for (const ev of infra.envVars) {
-            lines.push(`| \`${ev.name}\` | \`${escapeTable(ev.value)}\` | ${ev.source} |`);
+            lines.push(`| \`${ev.name}\` | \`${escapeTable(safeValue(ev.name, ev.value))}\` | ${ev.source} |`);
         }
         lines.push("");
     }
@@ -98,7 +103,7 @@ export function formatInfrastructure(infra) {
                 lines.push("| Variable | Value |");
                 lines.push("|----------|-------|");
                 for (const [key, value] of vars) {
-                    lines.push(`| \`${key}\` | \`${escapeTable(value)}\` |`);
+                    lines.push(`| \`${key}\` | \`${escapeTable(safeValue(key, value))}\` |`);
                 }
                 lines.push("");
             }

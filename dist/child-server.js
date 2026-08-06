@@ -4,8 +4,10 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 const CONNECT_TIMEOUT_MS = 15_000;
 const CHILD_TOOL_TIMEOUT_MS = 30_000;
+// Supply-chain hardening: child packages are pinned to exact versions.
+// Overrides that drop the pin are rejected at spawn time (see assertChildServerPinned).
 const TREE_SITTER_CMD = process.env.TREE_SITTER_MCP_CMD ?? "uvx";
-const TREE_SITTER_ARGS = process.env.TREE_SITTER_MCP_ARGS ? process.env.TREE_SITTER_MCP_ARGS.split(" ") : ["--from", "tree-sitter-analyzer[mcp]", "tree-sitter-analyzer-mcp"];
+const TREE_SITTER_ARGS = process.env.TREE_SITTER_MCP_ARGS ? process.env.TREE_SITTER_MCP_ARGS.split(" ") : ["--from", "tree-sitter-analyzer[mcp]==1.29.0", "tree-sitter-analyzer-mcp"];
 /**
  * Soft-fail client returned when a child server fails to connect.
  * Returns a text result with an error message instead of throwing,
@@ -39,9 +41,37 @@ function checkUvxAvailable() {
         return false;
     }
 }
+const NPM_PINNED = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*@\d+(\.\d+){1,2}(-[0-9A-Za-z-.]+)?$/;
+const PYPI_PINNED = /^[a-zA-Z0-9._-]+(\[[a-zA-Z0-9,_-]*\])?==\d+(\.\d+){1,2}([a-zA-Z0-9.+_-]*)?$/;
+/**
+ * Reject npx/uvx child-server configs that fetch packages without an exact
+ * version pin. Unpinned `npx -y <pkg>` / `uvx --from <pkg>` execute whatever
+ * is currently published (or a hijacked name), so we fail closed.
+ */
+function assertChildServerPinned(config) {
+    if (config.command === "npx") {
+        const spec = config.args.find((a) => !a.startsWith("-") && !a.includes(" ") && (a.includes("/") || /^[a-z0-9@]/.test(a)));
+        if (spec && !NPM_PINNED.test(spec)) {
+            const msg = 'Refusing to spawn npx package "' + spec + '" without an exact version pin. Use pkg@1.2.3 (e.g. @nick-vi/type-inject-mcp@1.1.2).';
+            throw new Error(msg);
+        }
+        return;
+    }
+    if (config.command === "uvx") {
+        const fromIndex = config.args.indexOf("--from");
+        if (fromIndex >= 0) {
+            const spec = config.args[fromIndex + 1];
+            if (spec && !PYPI_PINNED.test(spec)) {
+                const msg = 'Refusing to spawn uvx package "' + spec + '" without an exact version pin. Use pkg==1.2.3 (e.g. tree-sitter-analyzer[mcp]==1.29.0).';
+                throw new Error(msg);
+            }
+        }
+    }
+}
 export class ChildServerManager {
     servers = new Map();
     async spawnServer(config) {
+        assertChildServerPinned(config);
         const transport = new StdioClientTransport({
             command: config.command,
             args: config.args,
@@ -126,7 +156,7 @@ export const CHILD_SERVER_CONFIGS = [
     {
         name: "type-inject",
         command: "npx",
-        args: ["-y", "@nick-vi/type-inject-mcp"],
+        args: ["-y", "@nick-vi/type-inject-mcp@1.1.2"],
         tools: ["infer_type", "resolve_signature"],
     },
 ];

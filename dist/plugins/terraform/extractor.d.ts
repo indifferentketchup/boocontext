@@ -1,4 +1,11 @@
 import type { HclBlock, ServiceInfrastructure, EnvironmentOverrides, TerraformPluginConfig } from "./types.js";
+export declare const REDACTED = "[redacted]";
+export declare function isSensitiveKey(name: string): boolean;
+export declare function looksLikeSecretValue(value: string): boolean;
+export declare function redactValue(name: string, value: string): {
+    value: string;
+    sensitive: boolean;
+};
 /**
  * Extract structured infrastructure context from matched HCL blocks.
  */

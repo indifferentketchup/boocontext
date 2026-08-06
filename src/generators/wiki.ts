@@ -1,6 +1,6 @@
-import { mkdir, writeFile, readFile } from "node:fs/promises";
+import { mkdir, writeFile, readFile, lstat, rm, realpath } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { join, sep } from "node:path";
 import type { ScanResult, RouteInfo, SchemaModel, DetectionMethod, LibExport } from "../types.js";
 
 function today(): string {
@@ -623,7 +623,22 @@ async function appendLog(logPath: string, entry: string): Promise<void> {
   recent.push(newEntry);
 
   const header = "# Wiki Log\n\nHistory of `npx boocontext --wiki` runs. Capped at 20 entries.\n\n";
-  await writeFile(logPath, header + recent.join("\n\n") + "\n");
+  await writeNoFollow(logPath, header + recent.join("\n\n") + "\n");
+}
+
+/**
+ * Write without following symlinks. A scanned repo may plant a symlink inside
+ * .boocontext/wiki pointing at a host file; writeFile would follow it and
+ * overwrite that file. If the target is an existing symlink, remove it first.
+ */
+async function writeNoFollow(target: string, content: string): Promise<void> {
+  try {
+    const st = await lstat(target);
+    if (st.isSymbolicLink()) await rm(target);
+  } catch {
+    // target does not exist (normal case)
+  }
+  await writeFile(target, content);
 }
 
 // ─── Main export ─────────────────────────────────────────────────────────────
@@ -641,6 +656,14 @@ export async function generateWiki(
   const wikiDir = join(outputDir, "wiki");
   await mkdir(wikiDir, { recursive: true });
 
+  // Fail closed if the output dir or wiki dir is a symlink escaping the
+  // project output dir (a repo could plant .boocontext/wiki as a link).
+  const outputReal = await realpath(outputDir).catch(() => outputDir);
+  const wikiReal = await realpath(wikiDir).catch(() => wikiDir);
+  if (wikiReal !== outputReal && !wikiReal.startsWith(outputReal + sep)) {
+    throw new Error(`Refusing to generate wiki: ${wikiDir} resolves outside ${outputDir}`);
+  }
+
   // Pre-check: find route source files that no longer exist on disk
   // A missing file means the wiki is referencing deleted/renamed code — flag it
   const projectRoot = result.project.root;
@@ -657,14 +680,14 @@ export async function generateWiki(
 
   // overview.md — always
   const overview = overviewArticle(result);
-  await writeFile(join(wikiDir, "overview.md"), overview);
+  await writeNoFollow(join(wikiDir, "overview.md"), overview);
   articles.push("overview.md");
   totalChars += overview.length;
 
   // database.md — if schemas exist
   if (result.schemas.length > 0) {
     const db = databaseArticle(result);
-    await writeFile(join(wikiDir, "database.md"), db);
+    await writeNoFollow(join(wikiDir, "database.md"), db);
     articles.push("database.md");
     totalChars += db.length;
   }
@@ -681,7 +704,7 @@ export async function generateWiki(
       filename = `${slug}-${n++}.md`;
     }
     usedSlugs.add(filename);
-    await writeFile(join(wikiDir, filename), content);
+    await writeNoFollow(join(wikiDir, filename), content);
     articles.push(filename);
     totalChars += content.length;
   }
@@ -689,7 +712,7 @@ export async function generateWiki(
   // ui.md — if components exist
   if (result.components.length > 0) {
     const ui = uiArticle(result);
-    await writeFile(join(wikiDir, "ui.md"), ui);
+    await writeNoFollow(join(wikiDir, "ui.md"), ui);
     articles.push("ui.md");
     totalChars += ui.length;
   }
@@ -699,14 +722,14 @@ export async function generateWiki(
   const LIB_THRESHOLD = 10;
   if (result.libs.length >= LIB_THRESHOLD) {
     const lib = librariesArticle(result.libs);
-    await writeFile(join(wikiDir, "libraries.md"), lib);
+    await writeNoFollow(join(wikiDir, "libraries.md"), lib);
     articles.push("libraries.md");
     totalChars += lib.length;
   }
 
   // index.md
   const index = indexFile(result, articles);
-  await writeFile(join(wikiDir, "index.md"), index);
+  await writeNoFollow(join(wikiDir, "index.md"), index);
   totalChars += index.length;
 
   // log.md
@@ -724,13 +747,18 @@ export async function readWikiArticle(
   outputDir: string,
   article: string
 ): Promise<string | null> {
-  const { readFile } = await import("node:fs/promises");
+  const { readFile, realpath } = await import("node:fs/promises");
   const { resolve, sep } = await import("node:path");
   const name = article.endsWith(".md") ? article : `${article}.md`;
   const wikiDir = resolve(outputDir, "wiki");
   const resolved = resolve(wikiDir, name);
   if (!resolved.startsWith(wikiDir + sep) && resolved !== wikiDir) return null;
   try {
+    // Canonicalize both paths: a symlink planted at
+    // .boocontext/wiki/<article>.md must not resolve outside the wiki dir.
+    const realDir = await realpath(wikiDir);
+    const realTarget = await realpath(resolved);
+    if (realTarget !== realDir && !realTarget.startsWith(realDir + sep)) return null;
     return await readFile(resolved, "utf-8");
   } catch {
     return null;
@@ -751,8 +779,6 @@ export async function lintWiki(
   result: ScanResult,
   outputDir: string
 ): Promise<string> {
-  const { readFile } = await import("node:fs/promises");
-  const wikiDir = join(outputDir, "wiki");
   const articles = await listWikiArticles(outputDir);
 
   if (articles.length === 0) {
@@ -763,10 +789,7 @@ export async function lintWiki(
   const suggestions: string[] = [];
 
   // Check for orphan articles (not linked from index)
-  let indexContent = "";
-  try {
-    indexContent = await readFile(join(wikiDir, "index.md"), "utf-8");
-  } catch {}
+  const indexContent = (await readWikiArticle(outputDir, "index.md")) ?? "";
 
   for (const article of articles) {
     if (article === "index.md") continue;
@@ -778,12 +801,10 @@ export async function lintWiki(
   // Check for missing cross-links (domain articles not linking back to overview)
   for (const article of articles) {
     if (article === "index.md" || article === "overview.md") continue;
-    try {
-      const content = await readFile(join(wikiDir, article), "utf-8");
-      if (!content.includes("overview.md")) {
-        issues.push(`Missing backlink: \`${article}\` does not link to overview.md`);
-      }
-    } catch {}
+    const content = (await readWikiArticle(outputDir, article)) ?? "";
+    if (content && !content.includes("overview.md")) {
+      issues.push(`Missing backlink: \`${article}\` does not link to overview.md`);
+    }
   }
 
   // Suggestions based on result

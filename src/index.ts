@@ -29,6 +29,8 @@ function printHelp() {
     --html                   Generate interactive HTML report
     --open                   Generate HTML report and open in browser
     --mcp                    Start as MCP server (for Claude Code, Cursor)
+    --allow-config-exec      Allow executing boocontext.config.(js|ts|mjs) code
+                             (off by default: scanning untrusted repos should not run their config)
     --json                   Output JSON instead of markdown
     --benchmark              Show detailed token savings breakdown
     --profile <tool>         Generate optimized config (claude-code|cursor|codex|copilot|windsurf|agents)
@@ -94,7 +96,9 @@ async function installGitHook(root: string, outputDirName: string) {
   } catch {}
 
   const safeOutputDir = outputDirName.replace(/[^a-zA-Z0-9._-]/g, "");
-  const hookCommand = `\n# boocontext: regenerate AI context\nnpx boocontext --wiki -o ${safeOutputDir}\ngit add ${safeOutputDir}/\n`;
+  // Pin to the installed boocontext version so the hook does not fetch an
+  // unpinned latest package at commit time.
+  const hookCommand = "\n# boocontext: regenerate AI context\nnpx boocontext@" + VERSION + " --wiki -o " + safeOutputDir + "\ngit add " + safeOutputDir + "/\n";
 
   if (existingContent.includes("boocontext")) {
     console.log("  Git hook already installed.");
@@ -291,6 +295,8 @@ async function main() {
       doOpen = true;
     } else if (arg === "--mcp") {
       doMcp = true;
+    } else if (arg === "--allow-config-exec") {
+      process.env.BOOCONTEXT_ALLOW_CONFIG_EXEC = "1";
     } else if (arg === "--benchmark") {
       doBenchmark = true;
     } else if (arg === "--profile" && args[i + 1]) {

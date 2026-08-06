@@ -1,5 +1,5 @@
-import { resolve, join } from "node:path";
-import { readFile } from "node:fs/promises";
+import { resolve, join, sep, delimiter } from "node:path";
+import { readFile, realpath } from "node:fs/promises";
 import { analyzeBlastRadius, analyzeMultiFileBlastRadius } from "./detectors/blast-radius.js";
 import { writeOutput } from "./formatter.js";
 import { readWikiArticle, listWikiArticles, lintWiki } from "./generators/wiki.js";
@@ -30,6 +30,28 @@ function send(msg) {
     process.stdout.write(header + json);
 }
 export const childManager = new ChildServerManager();
+// =================== ROOT ALLOWLIST ===================
+/**
+ * Optional allowlist for MCP `directory` arguments (F-04). When
+ * BOOCONTEXT_ALLOWED_ROOTS is set (a delimiter-separated list), every tool's
+ * `directory` argument is canonicalized with realpath and rejected unless it
+ * resolves inside one of the allowed roots. Unset keeps legacy behavior (any
+ * directory), which is acceptable only for a trusted local stdio client.
+ */
+const allowedRoots = process.env.BOOCONTEXT_ALLOWED_ROOTS
+    ? process.env.BOOCONTEXT_ALLOWED_ROOTS.split(delimiter).filter(Boolean).map((r) => resolve(r))
+    : null;
+async function isAllowedRoot(dir) {
+    if (!allowedRoots)
+        return true;
+    const realDir = await realpath(resolve(dir)).catch(() => resolve(dir));
+    for (const root of allowedRoots) {
+        const realRoot = await realpath(root).catch(() => root);
+        if (realDir === realRoot || realDir.startsWith(realRoot + sep))
+            return true;
+    }
+    return false;
+}
 // =================== TOOL IMPLEMENTATIONS ===================
 async function toolScan(args) {
     const dir = args.directory ? resolve(args.directory) : process.cwd();
@@ -545,6 +567,7 @@ for (const tool of boocontextTools) {
     TOOLS.push(tool);
 }
 const TOOL_CALL_TIMEOUT_MS = 60_000;
+const MAX_FRAME_BYTES = 32 * 1024 * 1024;
 // =================== MCP PROTOCOL ===================
 async function handleRequest(req) {
     if (req.method === "initialize") {
@@ -579,6 +602,21 @@ async function handleRequest(req) {
     if (req.method === "tools/call") {
         const toolName = req.params?.name;
         const args = req.params?.arguments || {};
+        // Confine directory reads to the configured allowlist when one is set.
+        if (args && typeof args === "object" && args.directory !== undefined) {
+            const dir = String(args.directory || process.cwd());
+            if (!(await isAllowedRoot(dir))) {
+                send({
+                    jsonrpc: "2.0",
+                    id: req.id ?? null,
+                    result: {
+                        content: [{ type: "text", text: `Error: directory "${dir}" is outside BOOCONTEXT_ALLOWED_ROOTS.` }],
+                        isError: true,
+                    },
+                });
+                return;
+            }
+        }
         const tool = TOOLS.find((t) => t.name === toolName);
         if (tool) {
             try {
@@ -687,6 +725,20 @@ export async function startMCPServer() {
                 continue;
             }
             const contentLength = parseInt(lengthMatch[1], 10);
+            // F-07: cap attacker-declared frame sizes so a local client cannot
+            // force an unbounded buffer allocation.
+            if (contentLength > MAX_FRAME_BYTES) {
+                send({
+                    jsonrpc: "2.0",
+                    id: null,
+                    error: {
+                        code: -32600,
+                        message: `Request too large: Content-Length ${contentLength} exceeds ${MAX_FRAME_BYTES} bytes`,
+                    },
+                });
+                buffer = "";
+                break;
+            }
             const bodyStart = headerEnd + 4;
             if (buffer.length < bodyStart + contentLength)
                 break;

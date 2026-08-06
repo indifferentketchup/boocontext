@@ -3,6 +3,26 @@ import { normaliseServiceName } from "./service-matcher.js";
 import { parseTfvars } from "./hcl-parser.js";
 import { readFileSafe } from "./file-collector.js";
 /**
+ * Credential-shaped detection. Terraform configs routinely contain literal
+ * secrets (db passwords, API keys, .tfvars overrides); those values must
+ * never be emitted into generated, auto-staged output. Redaction happens at
+ * extraction time (values are replaced with REDACTED) and again defensively
+ * at format time.
+ */
+const SENSITIVE_KEY = /(pass(word)?|pwd|secret|token|api[_-]?key|access[_-]?key|client[_-]?secret|credential|private[_-]?key|jwt|session|connection[_-]?string|dsn|database[_-]?url|db[_-]?url|auth)/i;
+const SECRET_VALUE = /(sk-[A-Za-z0-9_-]{8,}|ghp_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|[a-z][a-z0-9+.-]*:\/\/[^\/\s:@]+:[^\/\s@]+@)/i;
+export const REDACTED = "[redacted]";
+export function isSensitiveKey(name) {
+    return SENSITIVE_KEY.test(name);
+}
+export function looksLikeSecretValue(value) {
+    return SECRET_VALUE.test(value) || /^[A-Za-z0-9_\-]{32,}$/.test(value);
+}
+export function redactValue(name, value) {
+    const sensitive = isSensitiveKey(name) || looksLikeSecretValue(value);
+    return sensitive ? { value: REDACTED, sensitive: true } : { value, sensitive: false };
+}
+/**
  * Extract structured infrastructure context from matched HCL blocks.
  */
 export function extractServiceInfrastructure(matchedBlocks, allBlocks, config) {
@@ -53,7 +73,7 @@ export async function extractEnvironments(tfvarsFiles, serviceName) {
             }
             // Check if variable name contains the service name
             if (normalisedKey.includes(normalised)) {
-                matched[key] = value;
+                matched[key] = redactValue(key, value).value;
             }
         }
         if (Object.keys(matched).length > 0 || enabled !== undefined) {
@@ -183,14 +203,16 @@ function extractEnvVars(blocks) {
             continue;
         for (const entry of entries) {
             const name = entry.attributes["name"];
-            const value = entry.attributes["value"] ?? entry.attributes["valueFrom"] ?? "";
+            const rawValue = entry.attributes["value"] ?? entry.attributes["valueFrom"] ?? "";
             if (!name || seen.has(name))
                 continue;
             seen.add(name);
+            const { value, sensitive } = redactValue(name, rawValue);
             envVars.push({
                 name,
                 value,
-                source: classifyValueSource(value),
+                sensitive,
+                source: classifyValueSource(rawValue),
             });
         }
     }

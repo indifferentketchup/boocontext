@@ -64,6 +64,8 @@ export interface EnvVar {
   name: string;
   value: string;
   source: "literal" | "variable" | "reference";
+  /** True when the value was redacted because it looks like a secret */
+  sensitive?: boolean;
 }
 
 export interface SecretRef {

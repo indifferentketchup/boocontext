@@ -1,6 +1,6 @@
 {
   "name": "boocontext",
-  "version": "1.16.1",
+  "version": "1.16.6",
   "description": "MCP codebase context server: routes, schema, call graphs, health, type recovery. AST precision, one npx call.",
   "type": "module",
   "main": "dist/index.js",
@@ -60,7 +60,14 @@
     "bun": ">=1.0.0"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0"
+    "@modelcontextprotocol/sdk": "1.30.0"
+  },
+  "overrides": {
+    "hono": "4.13.0",
+    "@hono/node-server": "2.1.0",
+    "fast-uri": "3.1.5",
+    "ip-address": "10.4.0",
+    "body-parser": "2.3.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
